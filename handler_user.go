@@ -15,7 +15,14 @@ func handlerLogin(s *state, cmd command) error {
 	}
 	name := cmd.Args[0]
 
-	err := s.cfg.SetUser(name)
+	ctx := context.Background()
+	user, err := s.db.GetUserByName(ctx, name)
+
+	if err != nil {
+		return fmt.Errorf("couldn't login user: %w", err)
+	}
+
+	err = s.cfg.SetUser(user.Name)
 	if err != nil {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
