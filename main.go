@@ -4,15 +4,18 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"time"
 
+	"github.com/Pizzu/gator/internal/api"
 	"github.com/Pizzu/gator/internal/config"
 	"github.com/Pizzu/gator/internal/database"
 	_ "github.com/lib/pq"
 )
 
 type state struct {
-	cfg *config.Config
-	db  *database.Queries
+	cfg    *config.Config
+	db     *database.Queries
+	client api.Client
 }
 
 func main() {
@@ -30,10 +33,12 @@ func main() {
 	defer closeDB(db)
 
 	dbQueries := database.New(db)
+	client := api.NewClient(5 * time.Second)
 
 	programState := &state{
-		cfg: &cfg,
-		db:  dbQueries,
+		cfg:    &cfg,
+		db:     dbQueries,
+		client: client,
 	}
 
 	cmds := commands{
@@ -41,8 +46,9 @@ func main() {
 	}
 	cmds.register("login", handlerLogin)
 	cmds.register("register", handlerRegister)
-	cmds.register("reset", handleResetUsers)
-	cmds.register("users", handleGetAllUsers)
+	cmds.register("reset", handlerResetUsers)
+	cmds.register("users", handlerGetAllUsers)
+	cmds.register("agg", handlerAggregator)
 
 	if len(os.Args) < 2 {
 		log.Fatal("Usage: cli <command> [args...]")

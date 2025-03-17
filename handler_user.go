@@ -56,7 +56,7 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
-func handleGetAllUsers(s *state, _ command) error {
+func handlerGetAllUsers(s *state, _ command) error {
 	ctx := context.Background()
 
 	users, err := s.db.GetUsers(ctx)
@@ -78,7 +78,7 @@ func handleGetAllUsers(s *state, _ command) error {
 	return nil
 }
 
-func handleResetUsers(s *state, _ command) error {
+func handlerResetUsers(s *state, _ command) error {
 	ctx := context.Background()
 
 	err := s.db.DeleteAllUsers(ctx)
