@@ -55,3 +55,16 @@ func handlerRegister(s *state, cmd command) error {
 	fmt.Printf("User created and set successfully: %v\n", user)
 	return nil
 }
+
+func handleResetUsers(s *state, _ command) error {
+	ctx := context.Background()
+
+	err := s.db.DeleteAllUsers(ctx)
+
+	if err != nil {
+		return fmt.Errorf("couldn't register delete users")
+	}
+
+	fmt.Println("users deleted successfully")
+	return nil
+}
