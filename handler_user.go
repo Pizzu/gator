@@ -56,6 +56,28 @@ func handlerRegister(s *state, cmd command) error {
 	return nil
 }
 
+func handleGetAllUsers(s *state, _ command) error {
+	ctx := context.Background()
+
+	users, err := s.db.GetUsers(ctx)
+
+	if err != nil {
+		return fmt.Errorf("couldn't get all users")
+	}
+
+	currentUser := s.cfg.CurrentUserName
+
+	for _, user := range users {
+		if currentUser == user.Name {
+			fmt.Printf("* %s (current)\n", user.Name)
+		} else {
+			fmt.Printf("* %s\n", user.Name)
+		}
+	}
+
+	return nil
+}
+
 func handleResetUsers(s *state, _ command) error {
 	ctx := context.Background()
 
