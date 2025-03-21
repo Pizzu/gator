@@ -10,22 +10,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAggregator(s *state, cmd command) error {
-	ctx := context.Background()
-
-	feed, err := s.client.FetchFeed(ctx, "https://www.wagslane.dev/index.xml")
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Feed: %+v\n", feed)
-	return nil
-}
-
-func handlerAddFeed(s *state, cmd command) error {
-	if len(cmd.Args) != 2 {
-		return fmt.Errorf("usage: %s <name> <url>", cmd.Name)
+func handlerFeedFollow(s *state, cmd command) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <url>", cmd.Name)
 	}
 
 	currentUsername := s.cfg.CurrentUserName
@@ -39,15 +26,9 @@ func handlerAddFeed(s *state, cmd command) error {
 		return err
 	}
 
-	name := cmd.Args[0]
-	url := cmd.Args[1]
+	url := cmd.Args[0]
 
-	feedPayload := database.CreateFeedParams{
-		ID: uuid.New(), CreatedAt: time.Now(), UpdatedAt: time.Now(),
-		Name: name, Url: url, UserID: user.ID,
-	}
-
-	feed, err := s.db.CreateFeed(ctx, feedPayload)
+	feed, err := s.db.GetFeedByUrl(ctx, url)
 
 	if err != nil {
 		return err
@@ -65,22 +46,32 @@ func handlerAddFeed(s *state, cmd command) error {
 	}
 
 	fmt.Printf("%s started following %s feed\n", feedFollow.UserName, feedFollow.FeedName)
-	fmt.Printf("%+v\n", feed)
 
 	return nil
 }
 
-func handlerGetAllFeeds(s *state, _ command) error {
+func handlerFollowing(s *state, cmd command) error {
+	currentUsername := s.cfg.CurrentUserName
+	if currentUsername == "" {
+		return errors.New("not logged in, sign in first")
+	}
 	ctx := context.Background()
-
-	feeds, err := s.db.GetAllFeeds(ctx)
+	user, err := s.db.GetUserByName(ctx, currentUsername)
 
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve feeds")
+		return err
 	}
 
-	for _, feed := range feeds {
-		fmt.Printf("%+v\n", feed)
+	feedsFollowed, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
+
+	if err != nil {
+		return err
 	}
+
+	fmt.Printf("%s is following:\n", user.Name)
+	for _, feedFollowed := range feedsFollowed {
+		fmt.Printf("%s\n", feedFollowed.FeedName)
+	}
+
 	return nil
 }
