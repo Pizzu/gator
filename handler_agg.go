@@ -2,8 +2,13 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"strings"
 	"time"
+
+	"github.com/Pizzu/gator/internal/database"
+	"github.com/google/uuid"
 )
 
 func handlerAggregator(s *state, cmd command) error {
@@ -16,43 +21,72 @@ func handlerAggregator(s *state, cmd command) error {
 		return fmt.Errorf("invalid duration: %w", err)
 	}
 
-	fmt.Printf("Collecting feeds every %s...", timeBetweenRequests)
+	fmt.Printf("Collecting feeds every %s...\n", timeBetweenRequests)
 
 	ticker := time.NewTicker(timeBetweenRequests)
 	defer ticker.Stop()
 
 	for ; ; <-ticker.C {
-		err := scrapeFeeds(s)
-		if err != nil {
-			return err
-		}
+		scrapeFeeds(s)
 	}
 }
 
-func scrapeFeeds(s *state) error {
+func scrapeFeeds(s *state) {
 	ctx := context.Background()
 
 	feed, err := s.db.GetNextFeedToFetch(ctx)
 
 	if err != nil {
-		return err
+		fmt.Printf("Couldn't fetch next feed: %v", err)
+		return
 	}
 
 	markedFeed, err := s.db.MarkFeedFetched(ctx, feed.ID)
 
 	if err != nil {
-		return err
+		fmt.Printf("Couldn't save fetched feed: %v", err)
+		return
 	}
 
 	fetchedFeed, err := s.client.FetchFeed(ctx, markedFeed.Url)
 
 	if err != nil {
-		return err
+		fmt.Printf("Error while fetching feed details: %v", err)
+		return
 	}
 
+	// Save all the posts for the current feed
 	for _, post := range fetchedFeed.Channel.Item {
-		fmt.Printf("Post: %+v\n", post.Title)
-	}
+		publishedAt := sql.NullTime{}
 
-	return nil
+		if t, err := time.Parse(time.RFC1123Z, post.PubDate); err == nil {
+			publishedAt = sql.NullTime{
+				Time:  t,
+				Valid: true,
+			}
+		}
+
+		_, err = s.db.CreatePost(context.Background(), database.CreatePostParams{
+			ID:        uuid.New(),
+			CreatedAt: time.Now().UTC(),
+			UpdatedAt: time.Now().UTC(),
+			FeedID:    feed.ID,
+			Title:     post.Title,
+			Description: sql.NullString{
+				String: post.Description,
+				Valid:  true,
+			},
+			Url:         post.Link,
+			PublishedAt: publishedAt,
+		})
+		if err != nil {
+			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
+				continue
+			}
+			fmt.Printf("Couldn't create post: %v", err)
+			continue
+		}
+
+	}
+	fmt.Printf("Feed %s collected, %v posts found\n", feed.Name, len(fetchedFeed.Channel.Item))
 }
