@@ -40,6 +40,26 @@ func handlerFeedFollow(s *state, cmd command, user database.User) error {
 	return nil
 }
 
+func handlerFeedUnfollow(s *state, cmd command, user database.User) error {
+	if len(cmd.Args) != 1 {
+		return fmt.Errorf("usage: %s <url>", cmd.Name)
+	}
+
+	ctx := context.Background()
+
+	url := cmd.Args[0]
+
+	err := s.db.UnfollowFeed(ctx, database.UnfollowFeedParams{UserID: user.ID, Url: url})
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%s stopped following %s feed\n", user.Name, url)
+
+	return nil
+}
+
 func handlerFollowing(s *state, cmd command, user database.User) error {
 	ctx := context.Background()
 
