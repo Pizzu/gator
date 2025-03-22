@@ -9,19 +9,6 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerAggregator(s *state, cmd command) error {
-	ctx := context.Background()
-
-	feed, err := s.client.FetchFeed(ctx, "https://www.wagslane.dev/index.xml")
-
-	if err != nil {
-		return err
-	}
-
-	fmt.Printf("Feed: %+v\n", feed)
-	return nil
-}
-
 func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.Name)
