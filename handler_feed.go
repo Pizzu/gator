@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -23,21 +22,12 @@ func handlerAggregator(s *state, cmd command) error {
 	return nil
 }
 
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 2 {
 		return fmt.Errorf("usage: %s <name> <url>", cmd.Name)
 	}
 
-	currentUsername := s.cfg.CurrentUserName
-	if currentUsername == "" {
-		return errors.New("not logged in, sign in first")
-	}
 	ctx := context.Background()
-	user, err := s.db.GetUserByName(ctx, currentUsername)
-
-	if err != nil {
-		return err
-	}
 
 	name := cmd.Args[0]
 	url := cmd.Args[1]

@@ -84,7 +84,7 @@ func handlerResetUsers(s *state, _ command) error {
 	err := s.db.DeleteAllUsers(ctx)
 
 	if err != nil {
-		return fmt.Errorf("couldn't register delete users")
+		return fmt.Errorf("couldn't delete users")
 	}
 
 	fmt.Println("users deleted successfully")

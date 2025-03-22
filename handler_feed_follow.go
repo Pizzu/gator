@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"time"
 
@@ -10,21 +9,12 @@ import (
 	"github.com/google/uuid"
 )
 
-func handlerFeedFollow(s *state, cmd command) error {
+func handlerFeedFollow(s *state, cmd command, user database.User) error {
 	if len(cmd.Args) != 1 {
 		return fmt.Errorf("usage: %s <url>", cmd.Name)
 	}
 
-	currentUsername := s.cfg.CurrentUserName
-	if currentUsername == "" {
-		return errors.New("not logged in, sign in first")
-	}
 	ctx := context.Background()
-	user, err := s.db.GetUserByName(ctx, currentUsername)
-
-	if err != nil {
-		return err
-	}
 
 	url := cmd.Args[0]
 
@@ -50,17 +40,8 @@ func handlerFeedFollow(s *state, cmd command) error {
 	return nil
 }
 
-func handlerFollowing(s *state, cmd command) error {
-	currentUsername := s.cfg.CurrentUserName
-	if currentUsername == "" {
-		return errors.New("not logged in, sign in first")
-	}
+func handlerFollowing(s *state, cmd command, user database.User) error {
 	ctx := context.Background()
-	user, err := s.db.GetUserByName(ctx, currentUsername)
-
-	if err != nil {
-		return err
-	}
 
 	feedsFollowed, err := s.db.GetFeedFollowsForUser(ctx, user.ID)
 
