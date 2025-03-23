@@ -27,7 +27,7 @@ func handlerLogin(s *state, cmd command) error {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Println("User switched successfully!")
+	s.logger.Info("User switched successfully!")
 	return nil
 }
 
@@ -52,7 +52,7 @@ func handlerRegister(s *state, cmd command) error {
 		return fmt.Errorf("couldn't set current user: %w", err)
 	}
 
-	fmt.Printf("User created and set successfully: %v\n", user)
+	s.logger.Info(fmt.Printf("User created and set successfully: %v", user))
 	return nil
 }
 
@@ -69,9 +69,9 @@ func handlerGetAllUsers(s *state, _ command) error {
 
 	for _, user := range users {
 		if currentUser == user.Name {
-			fmt.Printf("* %s (current)\n", user.Name)
+			s.logger.Printf("* %s (current)", user.Name)
 		} else {
-			fmt.Printf("* %s\n", user.Name)
+			s.logger.Printf("%s\n", user.Name)
 		}
 	}
 
@@ -87,6 +87,6 @@ func handlerResetUsers(s *state, _ command) error {
 		return fmt.Errorf("couldn't delete users")
 	}
 
-	fmt.Println("users deleted successfully")
+	s.logger.Info("users deleted successfully")
 	return nil
 }

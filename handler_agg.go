@@ -21,7 +21,7 @@ func handlerAggregator(s *state, cmd command) error {
 		return fmt.Errorf("invalid duration: %w", err)
 	}
 
-	fmt.Printf("Collecting feeds every %s...\n", timeBetweenRequests)
+	s.logger.Info(fmt.Sprintf("Collecting feeds every %s...", timeBetweenRequests))
 
 	ticker := time.NewTicker(timeBetweenRequests)
 	defer ticker.Stop()
@@ -37,21 +37,21 @@ func scrapeFeeds(s *state) {
 	feed, err := s.db.GetNextFeedToFetch(ctx)
 
 	if err != nil {
-		fmt.Printf("Couldn't fetch next feed: %v", err)
+		s.logger.Error(fmt.Sprintf("Couldn't fetch next feed: %v", err))
 		return
 	}
 
 	markedFeed, err := s.db.MarkFeedFetched(ctx, feed.ID)
 
 	if err != nil {
-		fmt.Printf("Couldn't save fetched feed: %v", err)
+		s.logger.Error(fmt.Sprintf("Couldn't save fetched feed: %v", err))
 		return
 	}
 
 	fetchedFeed, err := s.client.FetchFeed(ctx, markedFeed.Url)
 
 	if err != nil {
-		fmt.Printf("Error while fetching feed details: %v", err)
+		s.logger.Error(fmt.Sprintf("Error while fetching feed details: %v", err))
 		return
 	}
 
@@ -83,10 +83,10 @@ func scrapeFeeds(s *state) {
 			if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 				continue
 			}
-			fmt.Printf("Couldn't create post: %v", err)
+			s.logger.Error(fmt.Sprintf("Couldn't create post: %v", err))
 			continue
 		}
 
 	}
-	fmt.Printf("Feed %s collected, %v posts found\n", feed.Name, len(fetchedFeed.Channel.Item))
+	s.logger.Info(fmt.Sprintf("Feed %s collected, %v posts found\n", feed.Name, len(fetchedFeed.Channel.Item)))
 }

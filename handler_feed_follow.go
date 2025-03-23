@@ -35,7 +35,7 @@ func handlerFeedFollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	fmt.Printf("%s started following %s feed\n", feedFollow.UserName, feedFollow.FeedName)
+	s.logger.Info(fmt.Sprintf("%s started following %s feed", feedFollow.UserName, feedFollow.FeedName))
 
 	return nil
 }
@@ -55,7 +55,7 @@ func handlerFeedUnfollow(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	fmt.Printf("%s stopped following %s feed\n", user.Name, url)
+	s.logger.Info(fmt.Sprintf("%s stopped following %s feed", user.Name, url))
 
 	return nil
 }
@@ -69,9 +69,9 @@ func handlerFollowing(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	fmt.Printf("%s is following:\n", user.Name)
+	s.logger.Info(fmt.Sprintf("%s is following:", user.Name))
 	for _, feedFollowed := range feedsFollowed {
-		fmt.Printf("%s\n", feedFollowed.FeedName)
+		s.logger.Printf("- %s", feedFollowed.FeedName)
 	}
 
 	return nil

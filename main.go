@@ -2,13 +2,13 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"os"
 	"time"
 
 	"github.com/Pizzu/gator/internal/api"
 	"github.com/Pizzu/gator/internal/config"
 	"github.com/Pizzu/gator/internal/database"
+	"github.com/charmbracelet/log"
 	_ "github.com/lib/pq"
 )
 
@@ -16,21 +16,24 @@ type state struct {
 	cfg    *config.Config
 	db     *database.Queries
 	client api.Client
+	logger *log.Logger
 }
 
 func main() {
+	logger := log.New(os.Stderr)
+
 	cfg, err := config.Read()
 	if err != nil {
-		log.Fatalf("error reading config: %v", err)
+		logger.Fatalf("error reading config: %v", err)
 	}
 
 	db, err := openDB(cfg.DbURL)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 
-	defer closeDB(db)
+	defer closeDB(db, logger)
 
 	dbQueries := database.New(db)
 	client := api.NewClient(5 * time.Second)
@@ -39,6 +42,7 @@ func main() {
 		cfg:    &cfg,
 		db:     dbQueries,
 		client: client,
+		logger: logger,
 	}
 
 	cmds := commands{
@@ -57,7 +61,7 @@ func main() {
 	cmds.register("browse", middlewareLoggedIn(handlerBrowse))
 
 	if len(os.Args) < 2 {
-		log.Fatal("Usage: cli <command> [args...]")
+		logger.Fatal("Usage: cli <command> [args...]")
 		return
 	}
 
@@ -66,7 +70,7 @@ func main() {
 
 	err = cmds.run(programState, command{Name: cmdName, Args: cmdArgs})
 	if err != nil {
-		log.Fatal(err.Error())
+		logger.Fatal(err.Error())
 	}
 }
 
@@ -81,9 +85,9 @@ func openDB(dsn string) (*sql.DB, error) {
 	return db, nil
 }
 
-func closeDB(db *sql.DB) {
+func closeDB(db *sql.DB, logger *log.Logger) {
 	err := db.Close()
 	if err != nil {
-		log.Fatal("Error while closing DB connection")
+		logger.Fatal("Error while closing DB connection")
 	}
 }

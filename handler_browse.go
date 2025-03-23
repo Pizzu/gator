@@ -26,7 +26,7 @@ func handlerBrowse(s *state, cmd command, user database.User) error {
 		return fmt.Errorf("couldn't get posts for user: %w", err)
 	}
 
-	fmt.Printf("Found %d posts for user %s:\n", len(posts), user.Name)
+	s.logger.Info(fmt.Sprintf("Found %d posts for user %s:\n", len(posts), user.Name))
 	for _, post := range posts {
 		fmt.Printf("%s from %s\n", post.PublishedAt.Time.Format("Mon Jan 2"), post.FeedName)
 		fmt.Printf("--- %s ---\n", post.Title)

@@ -41,8 +41,8 @@ func handlerAddFeed(s *state, cmd command, user database.User) error {
 		return err
 	}
 
-	fmt.Printf("%s started following %s feed\n", feedFollow.UserName, feedFollow.FeedName)
-	fmt.Printf("%+v\n", feed)
+	s.logger.Info(fmt.Sprintf("%s started following %s feed", feedFollow.UserName, feedFollow.FeedName))
+	s.logger.Info(fmt.Sprintf("%+v", feed))
 
 	return nil
 }
@@ -57,7 +57,7 @@ func handlerGetAllFeeds(s *state, _ command) error {
 	}
 
 	for _, feed := range feeds {
-		fmt.Printf("%+v\n", feed)
+		s.logger.Printf("%+v", feed)
 	}
 	return nil
 }
