@@ -12,10 +12,10 @@ Before you start using the Gator CLI, make sure you have the following installed
 
 To install **Goose**, run the following command:
 
-    ```
-    go install github.com/pressly/goose/v3/cmd/goose@latest
-    ```
-
+```
+go install github.com/pressly/goose/v3/cmd/goose@latest
+```
+    
 ## Setup
 
 1. **Clone the repository**:
