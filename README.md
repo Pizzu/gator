@@ -50,10 +50,13 @@ To install **Goose**, run the following command:
 
    Once the PostgreSQL container is up, you can run the database migrations with Goose:
 
-   From the root project type:
+   From the root project type the following commands:
 
    ```
    cd sql/schema
+   ```
+
+   ```
    goose postgres "postgres://postgres:<DB_PASSWORD>@127.0.0.1:5432/<DB_NAME>?sslmode=disable" up
    ```
 
@@ -97,60 +100,60 @@ The Gator CLI is used with the following commands:
 
 5. **To get feeds**:
 
-```
-go run . feeds
-```
+   ```
+   go run . feeds
+   ```
 
-The will retrieve all the feeds saved on the db.
+   The will retrieve all the feeds saved on the db.
 
 6. **To follow a feed**:
 
-```
-go run . follow "https://techcrunch.com/feed/"
-```
+   ```
+   go run . follow "https://techcrunch.com/feed/"
+   ```
 
-The current user will follow the specified feed (created from another user).
+   The current user will follow the specified feed (created from another user).
 
 7. **To unfollow a feed**:
 
-```
-go run . unfollow "https://techcrunch.com/feed/"
-```
+   ```
+   go run . unfollow "https://techcrunch.com/feed/"
+   ```
 
-The current user will unfollow the specified feed.
+   The current user will unfollow the specified feed.
 
 8. **To retrieve the feeds followed by the user**:
 
-```
-go run . following
-```
+   ```
+   go run . following
+   ```
 
-The will show all the feeds the current user follows.
+   The will show all the feeds the current user follows.
 
 9. **To aggregate feeds**:
 
-```
-go run . agg 1min
-```
+   ```
+   go run . agg 1min
+   ```
 
-The agg command is a never-ending loop that fetches feeds and saves posts to the database. The intended use case is to leave the agg command running in the background while you interact with the program in another terminal.
-Specify how often you want to collect and update feeds with the following format: 1min, 30min, etc..
+   The agg command is a never-ending loop that fetches feeds and saves posts to the database. The intended use case is to leave the agg command running in the background while you interact with the program in another terminal.
+   Specify how often you want to collect and update feeds with the following format: 1min, 30min, etc..
 
 10. **To browse feed posts**:
 
-```
-go run . browse 3
-```
+    ```
+    go run . browse 3
+    ```
 
-This will display all the posts that belong to the feeds followed by the current user. Use the second argument to set a LIMIT.
+    This will display all the posts that belong to the feeds followed by the current user. Use the second argument to set a LIMIT.
 
 11. **Reset**:
 
-```
-go run . reset
-```
+    ```
+    go run . reset
+    ```
 
-This will reset the entire DB for a fresh start.
+    This will reset the entire DB for a fresh start.
 
 ## Development
 
