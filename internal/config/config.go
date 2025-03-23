@@ -2,8 +2,11 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/joho/godotenv"
 )
 
 const configFileName = ".gatorconfig.json"
@@ -33,11 +36,29 @@ func Read() (Config, error) {
 		return Config{}, err
 	}
 
+	if configData.DbURL == "" {
+		err := godotenv.Load()
+		if err != nil {
+			return Config{}, err
+		}
+
+		dbPassword := os.Getenv("DB_PASSWORD")
+		dbName := os.Getenv("DB_NAME")
+
+		connectionString := fmt.Sprintf("postgres://postgres:%s@127.0.0.1:5432/%s?sslmode=disable", dbPassword, dbName)
+		configData.SetDbURL(connectionString)
+	}
+
 	return configData, nil
 }
 
 func (c *Config) SetUser(username string) error {
 	c.CurrentUserName = username
+	return write(*c)
+}
+
+func (c *Config) SetDbURL(connectionString string) error {
+	c.DbURL = connectionString
 	return write(*c)
 }
 

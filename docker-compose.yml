@@ -1,0 +1,15 @@
+services:
+  gator_postgres_database:
+    image: postgres:15.2
+    container_name: gator_postgres_database
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_db:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+volumes:
+  postgres_db:
