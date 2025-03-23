@@ -21,8 +21,8 @@ go install github.com/pressly/goose/v3/cmd/goose@latest
 1. **Clone the repository**:
 
    ```
-   git clone https://github.com/your-repo/gator-cli.git
-   cd gator-cli
+   git clone https://github.com/Pizzu/gator.git
+   cd gator
    ```
 
 2. **Set up environment variables**:
